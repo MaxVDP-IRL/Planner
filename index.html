@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planner</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Offline Planner</h1>
+    <nav id="nav"></nav>
+    <div class="topbar-actions">
+      <button id="exportBtn">Export JSON</button>
+      <label class="import-label">Import JSON <input id="importInput" type="file" accept="application/json" /></label>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <div id="focusModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" id="focusContent"></div>
+  </div>
+
+  <template id="taskInputTemplate">
+    <section class="card">
+      <h2>Add Task</h2>
+      <form id="taskForm" class="row wrap">
+        <input id="taskLine" placeholder="Review contract 15" required />
+        <input id="taskDue" type="date" />
+        <select id="taskPriority">
+          <option value="low">Low</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+        <button type="submit">Add</button>
+      </form>
+      <p class="hint">Enter one line ending in minutes (e.g. "Write memo 25").</p>
+    </section>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>
