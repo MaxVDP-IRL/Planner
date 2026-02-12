@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planner</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar card">
+      <h1>Planner</h1>
+      <div class="capture-row">
+        <input id="taskInput" type="text" placeholder="Type task ending with minutes (e.g. Draft update 45)" />
+        <input id="taskDueDate" type="date" />
+        <select id="taskPriority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+        <button id="addTaskBtn">Add task</button>
+      </div>
+      <div class="utility-row">
+        <button id="exportBtn" class="secondary">Export JSON</button>
+        <label class="file-import secondary">Import JSON<input id="importInput" type="file" accept="application/json" /></label>
+      </div>
+    </header>
+
+    <nav class="tabs card">
+      <button class="tab active" data-view="today">Today</button>
+      <button class="tab" data-view="backlog">Backlog</button>
+      <button class="tab" data-view="planner">Planner</button>
+      <button class="tab" data-view="stats">Stats</button>
+    </nav>
+
+    <main>
+      <section id="todayView" class="view active">
+        <div class="grid-2">
+          <article class="card section">
+            <h2>Today</h2>
+            <div id="liveTimeStats" class="time-stats"></div>
+            <div id="todayList" class="list"></div>
+          </article>
+          <aside class="card section">
+            <div class="section-header">
+              <h2>Backlog preview</h2>
+              <label>Sort
+                <select id="previewSort">
+                  <option value="priority">Priority</option>
+                  <option value="duration">Duration</option>
+                  <option value="due">Due date</option>
+                </select>
+              </label>
+            </div>
+            <div id="backlogPreview" class="list"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="backlogView" class="view">
+        <article class="card section">
+          <h2>Backlog</h2>
+          <div id="backlogList" class="list"></div>
+        </article>
+      </section>
+
+      <section id="plannerView" class="view">
+        <article class="card section">
+          <h2>Capacity Planner (09:00–17:00)</h2>
+          <div id="capacitySummary"></div>
+          <table id="meetingTable">
+            <thead><tr><th>Time</th><th>Meeting slot</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="workblocks">
+            <label>Email blocks (30m)
+              <input id="emailBlocks" type="number" min="0" max="16" step="1" />
+            </label>
+            <label>Teams blocks (30m)
+              <input id="teamsBlocks" type="number" min="0" max="16" step="1" />
+            </label>
+          </div>
+        </article>
+      </section>
+
+      <section id="statsView" class="view">
+        <article class="card section">
+          <h2>Focus timer</h2>
+          <div id="focusDisplay" class="focus-display">25:00</div>
+          <div class="row">
+            <button id="focusStart">Start</button>
+            <button id="focusStop" class="secondary">Stop</button>
+            <button id="focusReset" class="secondary">Reset</button>
+          </div>
+        </article>
+        <article class="card section">
+          <h2>Stats</h2>
+          <div id="statsSummary"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="editDialog">
+    <form method="dialog" id="editForm" class="edit-form">
+      <h3>Edit Task</h3>
+      <input type="hidden" id="editTaskId" />
+      <label>Title<input id="editTitle" type="text" required /></label>
+      <label>Minutes<input id="editMinutes" type="number" min="1" required /></label>
+      <label>Due date<input id="editDueDate" type="date" required /></label>
+      <label>Priority
+        <select id="editPriority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </label>
+      <div class="row">
+        <button type="submit">Save</button>
+        <button type="button" id="editCancel" class="secondary">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
