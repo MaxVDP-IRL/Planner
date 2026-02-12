@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Planner Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <script>
+    (function () {
+      var current = window.location.pathname + window.location.search + window.location.hash;
+      var encoded = encodeURIComponent(current);
+      window.location.replace('/Planner/?p=' + encoded);
+    })();
+  </script>
+</body>
+</html>
