@@ -18,7 +18,25 @@ let state = loadState();
 let focusTimer = null;
 let liveTimer = null;
 
-init();
+boot();
+
+
+function boot() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("p")) {
+      history.replaceState(null, "", "./");
+    }
+    init();
+  } catch (error) {
+    console.error("Planner failed to initialize", error);
+    const el = document.getElementById("bootError");
+    if (el) {
+      el.hidden = false;
+      el.textContent = "The app hit a startup error. Open DevTools for details; your local data is still preserved.";
+    }
+  }
+}
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);

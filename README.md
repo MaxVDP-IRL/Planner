@@ -34,6 +34,23 @@ A single-user, offline-first productivity planner for GitHub Pages.
 
 - Uses a stable storage key: `planner-app-state`.
 - On load/import, migration fills missing fields safely (e.g. default `priority = medium`, due date today) without wiping existing data.
+- Startup is guarded with error handling so a malformed saved payload cannot silently blank the page.
+
+## GitHub Pages deployment
+
+- This repo is a **plain static site** (no bundler/build step required).
+- `index.html` references `./styles.css` and `./app.js` using **relative paths** so assets load correctly under the project-site base path `https://maxvdp-irl.github.io/Planner/`.
+- Deployment is handled by GitHub Actions at `.github/workflows/deploy-pages.yml`, which uploads the repository root as the Pages artifact.
+- A `404.html` fallback redirects unknown paths back to `/Planner/` to prevent hard 404s on refresh/deep links.
+
+## Troubleshooting blank page on Pages
+
+If the app appears as only minimal static markup or blank:
+
+1. Open browser DevTools → **Network**.
+2. Refresh and verify JS/CSS requests return **200** (not 404).
+3. Confirm assets are loaded from `/Planner/...` (project subpath) and not root `/...`.
+4. Open DevTools → **Console** for startup errors (the app now shows a visible startup warning while preserving local data).
 
 ## Run locally
 

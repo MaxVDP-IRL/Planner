@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Planner</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -25,6 +25,7 @@
         <button id="exportBtn" class="secondary">Export JSON</button>
         <label class="file-import secondary">Import JSON<input id="importInput" type="file" accept="application/json" /></label>
       </div>
+      <p id="bootError" class="warning" hidden></p>
     </header>
 
     <nav class="tabs card">
@@ -124,6 +125,6 @@
     </form>
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
