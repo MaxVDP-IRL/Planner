@@ -17,6 +17,10 @@ const defaultState = () => ({
 let state = loadState();
 let focusTimer = null;
 let liveTimer = null;
+let tackleTimer = null;
+let tackleSecondsLeft = 0;
+let tackleRunning = false;
+let tackleTaskId = null;
 
 boot();
 
@@ -111,6 +115,12 @@ function saveState() {
 function init() {
   document.getElementById("taskDueDate").value = todayISO();
   document.getElementById("addTaskBtn").addEventListener("click", onAddTask);
+  document.getElementById("taskInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onAddTask();
+    }
+  });
   document.getElementById("previewSort").addEventListener("change", (e) => {
     state.previewSort = e.target.value;
     persistAndRender();
@@ -130,6 +140,10 @@ function init() {
 
   document.getElementById("editCancel").addEventListener("click", () => document.getElementById("editDialog").close());
   document.getElementById("editForm").addEventListener("submit", onSaveEdit);
+
+  document.getElementById("tacklePause").addEventListener("click", pauseTackle);
+  document.getElementById("tackleResume").addEventListener("click", resumeTackle);
+  document.getElementById("tackleClose").addEventListener("click", closeTackle);
 
   render();
   liveTimer = setInterval(() => renderLiveTime(), 30000);
@@ -161,6 +175,7 @@ function onAddTask() {
   const tasks = splitTask(baseTask).map((t) => ({ ...t, dayAssigned: priority === "urgent" ? todayISO() : t.dayAssigned }));
   state.tasks.push(...tasks);
   document.getElementById("taskInput").value = "";
+  document.getElementById("taskInput").focus();
   persistAndRender();
 }
 
@@ -242,10 +257,11 @@ function taskNode(task, options = {}) {
   `;
   const actions = wrapper.querySelector(".task-actions");
 
+  const tackleBtn = button("Tackle", () => openTackle(task.id));
   const doneBtn = button("Done", () => updateTask(task.id, (t) => ({ ...t, status: "done", dayAssigned: null })));
   const editBtn = button("Edit", () => openEdit(task.id), "secondary");
   const delBtn = button("Delete", () => deleteTask(task.id), "secondary");
-  actions.append(doneBtn, editBtn, delBtn);
+  actions.append(tackleBtn, doneBtn, editBtn, delBtn);
 
   if (!options.inToday) actions.prepend(button("Add Today", () => updateTask(task.id, (t) => ({ ...t, dayAssigned: todayISO() })), "secondary"));
   if (options.inToday) actions.prepend(button("Remove", () => updateTask(task.id, (t) => ({ ...t, dayAssigned: null })), "secondary"));
@@ -313,6 +329,53 @@ function deleteTask(id) {
     state.tasks = state.tasks.filter((t) => t.id !== id);
   }
   persistAndRender();
+}
+
+
+function openTackle(taskId) {
+  const task = state.tasks.find((t) => t.id === taskId && t.status !== "done");
+  if (!task) return;
+  tackleTaskId = task.id;
+  tackleSecondsLeft = Math.max(60, task.minutes * 60);
+  tackleRunning = true;
+  document.getElementById("tackleTitle").textContent = `Tackling: ${task.title}`;
+  document.getElementById("tackleDialog").showModal();
+  renderTackleDisplay();
+  clearInterval(tackleTimer);
+  tackleTimer = setInterval(() => {
+    if (!tackleRunning) return;
+    tackleSecondsLeft = Math.max(0, tackleSecondsLeft - 1);
+    renderTackleDisplay();
+    if (tackleSecondsLeft === 0) {
+      tackleRunning = false;
+      clearInterval(tackleTimer);
+      tackleTimer = null;
+    }
+  }, 1000);
+}
+
+function renderTackleDisplay() {
+  const min = String(Math.floor(tackleSecondsLeft / 60)).padStart(2, "0");
+  const sec = String(tackleSecondsLeft % 60).padStart(2, "0");
+  document.getElementById("tackleDisplay").textContent = `${min}:${sec}`;
+}
+
+function pauseTackle() {
+  tackleRunning = false;
+}
+
+function resumeTackle() {
+  if (!tackleTaskId || tackleSecondsLeft <= 0) return;
+  tackleRunning = true;
+}
+
+function closeTackle() {
+  tackleRunning = false;
+  clearInterval(tackleTimer);
+  tackleTimer = null;
+  tackleTaskId = null;
+  const dialog = document.getElementById("tackleDialog");
+  if (dialog.open) dialog.close();
 }
 
 function renderPlanner() {

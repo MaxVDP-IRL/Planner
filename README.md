@@ -5,6 +5,7 @@ A single-user, offline-first productivity planner for GitHub Pages.
 ## Features
 
 - **Capture tasks in one line** by typing text ending with minutes (example: `Write project update 45`).
+  - Press **Enter** in the task input to add quickly and continue keyboard-only capture.
 - **Automatic split for tasks >30 minutes** into 30-minute parts.
 - **Priority levels**: `low`, `medium`, `high`, `urgent` (default for new tasks is `medium`).
   - Sort priority order: urgent > high > medium > low.
@@ -27,6 +28,7 @@ A single-user, offline-first productivity planner for GitHub Pages.
   - Remaining working minutes after unfinished Today tasks.
   - Updates every 30 seconds.
 - **Dark mode** UI theme for reduced glare and better contrast.
+- **Tackle timer** per task: click **Tackle** to open a large countdown from that task's duration.
 - **Focus timer** and basic **stats**.
 - **Local data persistence** using `localStorage`.
 - **Export/Import JSON** for backup/restore.
@@ -41,7 +43,7 @@ A single-user, offline-first productivity planner for GitHub Pages.
 
 - This repo is a **plain static site** (no bundler/build step required).
 - `index.html` references `./styles.css` and `./app.js` using **relative paths** so assets load correctly under the project-site base path `https://maxvdp-irl.github.io/Planner/`.
-- Deployment is handled by GitHub Actions at `.github/workflows/deploy-pages.yml`, which uploads the repository root as the Pages artifact.
+- Deployment is handled by GitHub Actions at `.github/workflows/deploy-pages.yml`, triggered on pushes to `main`, and uploads the repository root as the Pages artifact.
 - A `404.html` fallback redirects unknown paths back to `/Planner/` to prevent hard 404s on refresh/deep links.
 
 ## Troubleshooting blank page on Pages
