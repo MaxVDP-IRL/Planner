@@ -54,9 +54,3 @@ button.secondary, .file-import.secondary { background: #0f1728; color: var(--tex
 .slot-btn.active { background:#1e365d; border-color:#4f8cff; }
 .workblocks { margin-top: var(--space-3); display:flex; gap: var(--space-3); flex-wrap: wrap; }
 @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .meeting-slots{grid-template-columns: repeat(2,minmax(120px,1fr));} }
-
-
-.tackle-wrap { min-width: 420px; background: var(--card); color: var(--text); }
-.tackle-display { font-size: 4.5rem; font-weight: 800; letter-spacing: 0.08em; margin: 0.75rem 0 1rem; }
-#tackleDialog { border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); }
-#tackleDialog::backdrop { background: rgba(2, 6, 23, 0.7); }
