@@ -123,7 +123,9 @@ function init() {
   });
   document.getElementById("previewSort").addEventListener("change", (e) => {
     state.previewSort = e.target.value;
-    persistAndRender();
+    saveState();
+    renderToday();
+    renderBacklog();
   });
   document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => activateView(tab.dataset.view)));
   document.getElementById("exportBtn").addEventListener("click", exportJSON);
@@ -233,7 +235,7 @@ function renderToday() {
 function renderBacklog() {
   const backlogList = document.getElementById("backlogList");
   backlogList.innerHTML = "";
-  const tasks = getOpenTasks().sort(sortByPriority);
+  const tasks = sortBacklogPreview(getOpenTasks());
   if (!tasks.length) backlogList.innerHTML = "<div class='task-item'>Backlog empty.</div>";
   tasks.forEach((task) => backlogList.appendChild(taskNode(task)));
 }
@@ -243,12 +245,14 @@ function taskNode(task, options = {}) {
   wrapper.className = "task-item";
   const isUrgentOverbook = task.priority === "urgent" && task.dayAssigned === todayISO() && remainingAfterWork() < 0;
   wrapper.innerHTML = `
-    <div>
-      <strong>${escapeHtml(task.title)}</strong>
+    <button class="done-radio" aria-label="Mark done" title="Mark done">◯</button>
+    <div class="task-main">
+      <button class="task-title-btn" title="Edit task">${escapeHtml(task.title)}</button>
       <div class="task-meta">
         <span>${task.minutes}m</span>
         <span>Due ${task.dueDate}</span>
         <span class="priority-pill priority-${task.priority}">${task.priority}</span>
+        ${task.status === "in_progress" ? `<span class="in-progress-tag">In progress</span>` : ""}
         ${task.groupId ? `<span>Part ${task.partIndex}/${task.partTotal}</span>` : ""}
       </div>
       ${isUrgentOverbook ? `<div class="warning">Urgent task added despite overbooking.</div>` : ""}
@@ -256,21 +260,38 @@ function taskNode(task, options = {}) {
     <div class="task-actions"></div>
   `;
   const actions = wrapper.querySelector(".task-actions");
+  wrapper.querySelector(".done-radio").addEventListener("click", () => updateTask(task.id, (t) => ({ ...t, status: "done", dayAssigned: null })));
+  wrapper.querySelector(".task-title-btn").addEventListener("click", () => openEdit(task.id));
 
-  const tackleBtn = button("Tackle", () => openTackle(task.id));
-  const doneBtn = button("Done", () => updateTask(task.id, (t) => ({ ...t, status: "done", dayAssigned: null })));
-  const editBtn = button("Edit", () => openEdit(task.id), "secondary");
-  const delBtn = button("Delete", () => deleteTask(task.id), "secondary");
-  actions.append(tackleBtn, doneBtn, editBtn, delBtn);
+  const tackleBtn = button("Tackle", () => openTackle(task.id), "icon-btn");
+  tackleBtn.title = "Tackle";
+  const progressBtn = button(task.status === "in_progress" ? "⏸" : "▶", () => toggleInProgress(task.id), "icon-btn secondary");
+  progressBtn.title = task.status === "in_progress" ? "Set open" : "Set in progress";
+  const delBtn = button("✕", () => deleteTask(task.id), "icon-btn danger");
+  delBtn.title = "Delete";
+  actions.append(tackleBtn, progressBtn, delBtn);
 
-  if (!options.inToday) actions.prepend(button("Add Today", () => updateTask(task.id, (t) => ({ ...t, dayAssigned: todayISO() })), "secondary"));
-  if (options.inToday) actions.prepend(button("Remove", () => updateTask(task.id, (t) => ({ ...t, dayAssigned: null })), "secondary"));
+  if (!options.inToday) {
+    const addBtn = button("＋", () => updateTask(task.id, (t) => ({ ...t, dayAssigned: todayISO() })), "icon-btn secondary");
+    addBtn.title = "Add to Today";
+    actions.prepend(addBtn);
+  }
+  if (options.inToday) {
+    const removeBtn = button("↩", () => updateTask(task.id, (t) => ({ ...t, dayAssigned: null })), "icon-btn return-btn");
+    removeBtn.title = "Remove from Today";
+    actions.prepend(removeBtn);
+  }
   return wrapper;
 }
 
 function updateTask(id, updater) {
   state.tasks = state.tasks.map((t) => (t.id === id ? updater(t) : t));
   persistAndRender();
+}
+
+
+function toggleInProgress(id) {
+  updateTask(id, (t) => ({ ...t, status: t.status === "in_progress" ? "open" : "in_progress" }));
 }
 
 function openEdit(id) {

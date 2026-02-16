@@ -14,14 +14,18 @@ A single-user, offline-first productivity planner for GitHub Pages.
   - Default due date is today.
   - New tasks are auto-added to Today (`dayAssigned = today`).
 - **Edit task support** (Today, Backlog, and Backlog preview):
-  - Editable fields: title, minutes, due date, priority.
+  - Click the task title to open edit options (title, minutes, due date, priority).
   - For split groups (`groupId`): editing title/due/priority on one part updates the full group.
   - Editing minutes affects only the selected part.
   - If edited minutes exceed 30, that part is split again into new parts.
-- **Delete task support**:
-  - Available in Today, Backlog, and Backlog preview.
+- **Compact task controls**:
+  - Mark done with a small radio-circle on the left of each task.
+  - Remove from Today with an orange return symbol (`↩`).
+  - Delete with a compact red `✕` icon.
+  - Toggle **In Progress** with a play/pause symbol (`▶`/`⏸`).
   - For split tasks, delete prompt supports deleting one part or entire group.
 - **Planner** for 09:00–17:00 with clickable 30-minute meeting time blocks and Email/Teams workblocks.
+- **Backlog preview sort** supports Priority, Duration, and Due date ordering and applies immediately when selected.
 - **Today live time display**:
   - Shows local current time.
   - Remaining working minutes after meetings/workblocks.

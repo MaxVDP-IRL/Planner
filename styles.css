@@ -36,9 +36,19 @@ button.secondary, .file-import.secondary { background: #0f1728; color: var(--tex
 .view.active { display:block; }
 .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-3); }
 .list { display: flex; flex-direction: column; gap: var(--space-2); }
-.task-item { border: 1px solid var(--border); border-radius: 8px; padding: var(--space-2); background: var(--card-soft); display:flex; justify-content:space-between; gap: var(--space-2); }
-.task-meta { color: var(--muted); font-size: 0.88rem; display:flex; gap:0.5rem; flex-wrap: wrap; }
-.task-actions { display:flex; gap: 0.4rem; align-items:flex-start; }
+.task-item { border: 1px solid var(--border); border-radius: 8px; padding: var(--space-2); background: var(--card-soft); display:flex; align-items:flex-start; gap: var(--space-2); }
+.task-main { flex: 1; min-width: 0; }
+.task-title-btn { background: transparent; border: 0; color: var(--text); font-weight: 700; padding: 0; text-align: left; cursor: pointer; }
+.task-title-btn:hover { text-decoration: underline; }
+.task-meta { color: var(--muted); font-size: 0.88rem; display:flex; gap:0.5rem; flex-wrap: wrap; margin-top: 0.2rem; }
+.task-actions { display:flex; gap: 0.35rem; align-items:center; margin-left: auto; }
+.done-radio { background: transparent; border: 1px solid #8096b8; color: #b7c6dc; border-radius: 999px; width: 1.45rem; height: 1.45rem; padding: 0; line-height: 1.2rem; font-size: 1rem; margin-top: 0.08rem; }
+.done-radio:hover { border-color: #a8c0e8; color: #e8f0ff; }
+.icon-btn { min-width: 1.85rem; padding: 0.1rem 0.35rem; background: #22314a; border-color: #324561; }
+.icon-btn.secondary { background: #1a2740; border-color: #314562; }
+.icon-btn.return-btn { background: #4e3414; border-color: #7a5320; color: #ffd39a; }
+.icon-btn.danger { background: #4d1f27; border-color: #7a303a; color: #ffbcc5; }
+.in-progress-tag { border: 1px solid #4f8cff; color: #a8c9ff; border-radius: 999px; padding: 0 0.4rem; font-size: 0.75rem; }
 .priority-pill { padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
 .priority-low { background:#273141; color:#b8c5d8; }
 .priority-medium { background:#1f3d76; color:#b8d1ff; }
