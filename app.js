@@ -405,7 +405,9 @@ function renderPlanner() {
   const meetingsMins = state.meetings.filter(Boolean).length * 30;
   const workblockMins = (state.workblocks.email + state.workblocks.teams) * 30;
   const available = Math.max(0, 480 - meetingsMins - workblockMins);
-  document.getElementById("capacitySummary").textContent = `Capacity today: ${available} min (${meetingsMins} meeting, ${workblockMins} workblocks)`;
+  const todayTaskMins = getTodayTasks().reduce((sum, task) => sum + task.minutes, 0);
+  const overBy = Math.max(0, todayTaskMins - available);
+  document.getElementById("capacitySummary").textContent = `Capacity today: ${available} min (${meetingsMins} meeting, ${workblockMins} workblocks). Today tasks: ${todayTaskMins} min. Over by: ${overBy} min.`;
   paintMeetingSlots();
 }
 
