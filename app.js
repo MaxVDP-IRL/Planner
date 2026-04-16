@@ -1,4 +1,5 @@
 const STORAGE_KEY = "planner-app-state";
+const COMPLETED_KEY = "planner-completed-tasks";
 const WORKDAY_START_MIN = 9 * 60;
 const WORKDAY_END_MIN = 17 * 60;
 const SLOT_COUNT = 16;
@@ -15,6 +16,7 @@ const defaultState = () => ({
 });
 
 let state = loadState();
+let completedTasks = loadCompleted();
 let focusTimer = null;
 let liveTimer = null;
 let tackleTimer = null;
@@ -86,6 +88,21 @@ function loadState() {
   }
 }
 
+function loadCompleted() {
+  try {
+    const raw = localStorage.getItem(COMPLETED_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCompleted() {
+  localStorage.setItem(COMPLETED_KEY, JSON.stringify(completedTasks));
+}
+
 function migrateState(raw) {
   const base = { ...defaultState(), ...raw };
   base.meetings = Array.isArray(base.meetings) ? base.meetings.slice(0, SLOT_COUNT) : Array(SLOT_COUNT).fill(false);
@@ -146,6 +163,8 @@ function init() {
   document.getElementById("tacklePause").addEventListener("click", pauseTackle);
   document.getElementById("tackleResume").addEventListener("click", resumeTackle);
   document.getElementById("tackleClose").addEventListener("click", closeTackle);
+
+  document.getElementById("clearCompletedBtn").addEventListener("click", clearCompleted);
 
   render();
   liveTimer = setInterval(() => renderLiveTime(), 30000);
@@ -214,6 +233,7 @@ function render() {
   renderPlanner();
   renderStats();
   renderFocus();
+  renderCompleted();
 }
 
 function renderToday() {
@@ -240,6 +260,41 @@ function renderBacklog() {
   tasks.forEach((task) => backlogList.appendChild(taskNode(task)));
 }
 
+function renderCompleted() {
+  const list = document.getElementById("completedList");
+  const countEl = document.getElementById("completedCount");
+  list.innerHTML = "";
+
+  const sorted = [...completedTasks].sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+  countEl.textContent = `${sorted.length} task${sorted.length !== 1 ? "s" : ""}`;
+
+  if (!sorted.length) {
+    list.innerHTML = "<div class='task-item'>No completed tasks yet.</div>";
+    return;
+  }
+
+  sorted.forEach((task) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "task-item completed-item";
+    const completedDate = new Date(task.completedAt);
+    const dateStr = completedDate.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" });
+    const timeStr = completedDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    wrapper.innerHTML = `
+      <div class="done-indicator" title="Completed">✓</div>
+      <div class="task-main">
+        <span class="task-title-static">${escapeHtml(task.title)}</span>
+        <div class="task-meta">
+          <span>${task.minutes}m</span>
+          <span class="priority-pill priority-${task.priority}">${task.priority}</span>
+          ${task.groupId ? `<span>Part ${task.partIndex}/${task.partTotal}</span>` : ""}
+          <span class="completed-timestamp">Completed ${dateStr} at ${timeStr}</span>
+        </div>
+      </div>
+    `;
+    list.appendChild(wrapper);
+  });
+}
+
 function taskNode(task, options = {}) {
   const wrapper = document.createElement("div");
   wrapper.className = "task-item";
@@ -260,7 +315,8 @@ function taskNode(task, options = {}) {
     <div class="task-actions"></div>
   `;
   const actions = wrapper.querySelector(".task-actions");
-  wrapper.querySelector(".done-radio").addEventListener("click", () => updateTask(task.id, (t) => ({ ...t, status: "done", dayAssigned: null })));
+
+  wrapper.querySelector(".done-radio").addEventListener("click", () => markTaskDone(task.id));
   wrapper.querySelector(".task-title-btn").addEventListener("click", () => openEdit(task.id));
 
   const tackleBtn = button("Tackle", () => openTackle(task.id), "icon-btn");
@@ -284,11 +340,29 @@ function taskNode(task, options = {}) {
   return wrapper;
 }
 
+function markTaskDone(id) {
+  const task = state.tasks.find((t) => t.id === id);
+  if (!task) return;
+  // Add to completed log with timestamp
+  completedTasks.push({ ...task, completedAt: new Date().toISOString() });
+  saveCompleted();
+  // Remove from active tasks (preserves existing behaviour — task disappears from active lists)
+  state.tasks = state.tasks.map((t) => (t.id === id ? { ...t, status: "done", dayAssigned: null } : t));
+  persistAndRender();
+}
+
+function clearCompleted() {
+  if (!completedTasks.length) return;
+  if (!confirm(`Clear all ${completedTasks.length} completed tasks from the log?`)) return;
+  completedTasks = [];
+  saveCompleted();
+  renderCompleted();
+}
+
 function updateTask(id, updater) {
   state.tasks = state.tasks.map((t) => (t.id === id ? updater(t) : t));
   persistAndRender();
 }
-
 
 function toggleInProgress(id) {
   updateTask(id, (t) => ({ ...t, status: t.status === "in_progress" ? "open" : "in_progress" }));
@@ -326,7 +400,6 @@ function onSaveEdit(e) {
     if (minutes <= 30) {
       state.tasks = state.tasks.map((t) => t.id === id ? { ...t, minutes } : t);
     } else {
-      // We intentionally create a new group for this edited part to keep sibling parts in the original split group unchanged.
       const edited = state.tasks.find((t) => t.id === id);
       state.tasks = state.tasks.filter((t) => t.id !== id);
       const splits = splitTask({ ...edited, minutes, groupId: null, partIndex: null, partTotal: null, id: uid() });
@@ -351,7 +424,6 @@ function deleteTask(id) {
   }
   persistAndRender();
 }
-
 
 function openTackle(taskId) {
   const task = state.tasks.find((t) => t.id === taskId && t.status !== "done");
@@ -381,9 +453,7 @@ function renderTackleDisplay() {
   document.getElementById("tackleDisplay").textContent = `${min}:${sec}`;
 }
 
-function pauseTackle() {
-  tackleRunning = false;
-}
+function pauseTackle() { tackleRunning = false; }
 
 function resumeTackle() {
   if (!tackleTaskId || tackleSecondsLeft <= 0) return;
