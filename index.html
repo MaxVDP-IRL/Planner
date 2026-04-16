@@ -33,6 +33,7 @@
       <button class="tab" data-view="backlog">Backlog</button>
       <button class="tab" data-view="planner">Planner</button>
       <button class="tab" data-view="stats">Stats</button>
+      <button class="tab" data-view="completed">Completed</button>
     </nav>
 
     <main>
@@ -97,6 +98,16 @@
           <div id="statsSummary"></div>
         </article>
       </section>
+
+      <section id="completedView" class="view">
+        <article class="card section">
+          <div class="section-header">
+            <h2>Completed <span id="completedCount" class="completed-count"></span></h2>
+            <button id="clearCompletedBtn" class="secondary danger-outline">Clear log</button>
+          </div>
+          <div id="completedList" class="list"></div>
+        </article>
+      </section>
     </main>
   </div>
 
@@ -121,7 +132,6 @@
       </div>
     </form>
   </dialog>
-
 
   <dialog id="tackleDialog">
     <div class="tackle-wrap">
